@@ -1,12 +1,12 @@
 import {CHARACTERS,BY_ID,QUESTIONS,CHAPTERS,MOODS,SOURCES} from './data.js?v=1.2.1';
 import {getResult,rankCharacters,describeSignals,pairing,readSaved,writeSaved,validAnswers,QuizSession} from './engine.js?v=1.2.1';
-import {SHARE_BASE,normalizeName,readName,writeName,headline,caption,linkPayload} from './personalization.js?v=1.2.1';
+import {SHARE_BASE,normalizeName,readName,writeName,headline,caption,linkPayload} from './personalization.js?v=1.2.2';
 import {DETAILS} from './details.js?v=1.2.1';
 import {mismatchFriends} from './relationships.js?v=1.2.1';
-import {createResultCardFiles} from './card.js?v=1.2.1';
-import {SHARE_PLATFORMS,cardFileName,nativeSharePayload,launchDeviceShare} from './sharing.js?v=1.2.1';
-import {imageDataURL,saveImageFile,canSaveWithDevice,saveWithDevice} from './downloads.js?v=1.2.1';
-import {isKakaoBrowser,isAppleMobile,makeHandoffURL,readHandoff,kakaoExternalURL} from './browser-handoff.js?v=1.2.1';
+import {createResultCardFiles} from './card.js?v=1.2.2';
+import {SHARE_PLATFORMS,cardFileName,nativeSharePayload,launchDeviceShare} from './sharing.js?v=1.2.2';
+import {imageDataURL,saveImageFile,canSaveWithDevice,saveWithDevice} from './downloads.js?v=1.2.2';
+import {isKakaoBrowser,isAppleMobile,makeHandoffURL,readHandoff,kakaoExternalURL} from './browser-handoff.js?v=1.2.2';
 import {withParticle} from './korean.js?v=1.2.1';
 const app=document.querySelector('#app'),modal=document.querySelector('#modal');
 const store=(()=>{try{return window.localStorage;}catch{return {getItem:()=>null,setItem:()=>{}};}})();

@@ -1,4 +1,4 @@
-import {normalizeName,cardPayload} from './personalization.js?v=1.2.1';
+import {normalizeName,cardPayload} from './personalization.js?v=1.2.2';
 
 export const SHARE_PLATFORMS=[
  {id:'kakao',name:'카카오톡',icon:'talk',linkHint:'친구와 채팅방에',cardHint:'친구에게 내 카드 보내기'},

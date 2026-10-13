@@ -1,4 +1,4 @@
-import {SHARE_BASE,normalizeName} from './personalization.js?v=1.2.1';
+import {SHARE_BASE,normalizeName} from './personalization.js?v=1.2.2';
 import {BY_ID} from './data.js?v=1.2.1';
 import {validAnswers,getResult} from './engine.js?v=1.2.1';
 

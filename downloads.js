@@ -1,4 +1,4 @@
-import {isKakaoBrowser,isAppleMobile} from './browser-handoff.js?v=1.2.1';
+import {isKakaoBrowser,isAppleMobile} from './browser-handoff.js?v=1.2.2';
 const IMAGE_TYPES={'image/png':'.png','image/jpeg':'.jpg'};
 
 export function imageDataURL(blob,Reader=globalThis.FileReader){

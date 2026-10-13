@@ -1,4 +1,4 @@
-import {normalizeName,shortDescription} from './personalization.js?v=1.2.1';
+import {normalizeName,shortDescription} from './personalization.js?v=1.2.2';
 function rounded(ctx,x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}}
 function fitText(ctx,text,maxWidth,size,family){ctx.font=`${size}px ${family}`;while(ctx.measureText(text).width>maxWidth&&size>18){size--;ctx.font=`${size}px ${family}`;}return size;}
 function wrapText(ctx,text,x,y,maxWidth,lineHeight){let line='';for(const word of text.split(/\s+/)){const next=line?line+' '+word:word;if(line&&ctx.measureText(next).width>maxWidth){ctx.fillText(line,x,y);line=word;y+=lineHeight;}else line=next;}if(line)ctx.fillText(line,x,y);return y+lineHeight;}
