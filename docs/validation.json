@@ -36,16 +36,25 @@
   "topScoreTies": 12415,
   "samples": 50000,
   "note": "Synthetic checks verify code and separation, not human psychological validity.",
-  "assetsChecked": 36,
+  "release": "1.1.0",
+  "assetsChecked": 39,
+  "nameRegistration": "Input normalization, persistence and invalid storage checked",
+  "koreanParticles": "All tag and relationship text uses final-syllable selection",
+  "friendSelections": 400,
+  "uniquePairs": 210,
+  "mismatchFriends": 40,
+  "personalityDetails": 60,
   "cardExport": {
     "characters": 20,
+    "names": 2,
+    "renders": 40,
     "dimensions": [
       1080,
       1440
     ],
     "textBoundsViolations": 0
   },
-  "shareChecks": "Result/invite URL, native dispatch, cancel/fallback and PNG payload passed.",
-  "mobileBrowserQA": "Not performed: browser QA tool unavailable.",
+  "shareChecks": "URL-only link share; named PNG, description and URL; cancel and fallback payloads passed",
+  "mobileBrowserQA": "Not performed: browser QA tool unavailable",
   "shareBase": "https://mkr-games.github.io/Chiikawatest/"
 }

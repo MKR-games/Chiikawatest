@@ -1,4 +1,5 @@
-import {CHARACTERS,QUESTIONS,BY_ID,VERSION} from './data.js';
+import {CHARACTERS,QUESTIONS,BY_ID,VERSION} from './data.js?v=1.1.0';
+import {relationship} from './relationships.js?v=1.1.0';
 export function validAnswers(answers,complete=false){
  return Array.isArray(answers)&&answers.length<=(QUESTIONS.length)&&(!complete||answers.length===QUESTIONS.length)&&Array.from(answers).every(a=>Number.isInteger(a)&&a>=0&&a<4);
 }
@@ -50,11 +51,7 @@ function signalVector(answers){
 }
 const CHARACTER_SIGNALS=Object.fromEntries(CHARACTERS.map(c=>[c.id,signalVector(c.profile)]));
 export function pairing(first,second){
- const a=BY_ID[first],b=BY_ID[second];if(!a||!b)throw new Error('캐릭터를 찾을 수 없어요.');
- if(a.id===b.id)return {label:'말하지 않아도 통하는 둘',text:'좋아하는 속도와 편안한 방식이 닮았어요. 익숙함 속에서 둘만의 새로운 재미도 하나 찾아보세요.',tip:'오늘 좋았던 장면 하나씩 나눠 보기'};
- const same=a.profile.reduce((n,v,i)=>n+(v===b.profile[i]?QUESTIONS[i].weight:0),0);
- const close=same>=8;
- return {label:close?'비슷해서 편안한 둘':'서로의 세계를 넓혀 주는 둘',text:close?`${a.name}의 ${a.tags[0]}, ${b.name}의 ${b.tags[0]}. 익숙한 마음을 서로 알아보기 쉬워요. 작은 차이는 묻고 들어 주세요.`:`${a.name}의 ${a.tags[0]}에 ${b.name}의 ${b.tags[0]}이 더해져요. 서로 다른 방식을 존중하면 혼자서는 놓쳤을 재미를 발견할 수 있어요.`,tip:close?'평소와 다른 작은 코스 하나 함께 가 보기':'오늘은 내가, 다음에는 친구가 코스 정하기'};
+ return relationship(first,second);
 }
 export function readSaved(storage){
  try {const d=JSON.parse(storage.getItem('little-day-v1'));return d&&d.version===VERSION&&validAnswers(d.answers)?d:null;}catch{return null;}
