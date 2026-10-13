@@ -1,0 +1,242 @@
+{
+  "chiikawa": {
+    "file": "assets/chiikawa.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      0,
+      0,
+      335,
+      362
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "hachiware": {
+    "file": "assets/hachiware.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      343,
+      0,
+      678,
+      374
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "usagi": {
+    "file": "assets/usagi.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      690,
+      0,
+      1025,
+      463
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "momonga": {
+    "file": "assets/momonga.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      1035,
+      0,
+      1454,
+      391
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "kurimanju": {
+    "file": "assets/kurimanju.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      1457,
+      0,
+      1765,
+      365
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "pochette": {
+    "file": "assets/pochette.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      1776,
+      0,
+      1937,
+      427
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "roudo": {
+    "file": "assets/roudo.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      1947,
+      0,
+      2108,
+      427
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "ramen": {
+    "file": "assets/ramen.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      2119,
+      0,
+      2280,
+      427
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "rakko": {
+    "file": "assets/rakko.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      2289,
+      0,
+      2629,
+      362
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "shisa": {
+    "file": "assets/shisa.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      2636,
+      0,
+      3036,
+      355
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "furuhonya": {
+    "file": "assets/furuhonya.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Official anime character sprite; exact CSS rectangle extracted; transparent padding added. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      3456,
+      0,
+      3770,
+      424
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "shimajiro": {
+    "file": "assets/shimajiro.webp",
+    "source_url": "https://chiikawa.toho-movie.jp/atm/img/ch_shima.webp",
+    "source_note": "Official movie character artwork; character region cropped. Hitoha has one leaf; Futaba has two leaves. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      0,
+      0,
+      1080,
+      950
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "siren": {
+    "file": "assets/siren.webp",
+    "source_url": "https://chiikawa.toho-movie.jp/atm/img/ch_siren.webp",
+    "source_note": "Official movie character artwork; character region cropped. Hitoha has one leaf; Futaba has two leaves. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      0,
+      0,
+      1080,
+      865
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "hitoha": {
+    "file": "assets/hitoha.webp",
+    "source_url": "https://chiikawa.toho-movie.jp/atm/img/ch_leaves_v2.webp",
+    "source_note": "Official movie character artwork; character region cropped. Hitoha has one leaf; Futaba has two leaves. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      0,
+      0,
+      548,
+      755
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "futaba": {
+    "file": "assets/futaba.webp",
+    "source_url": "https://chiikawa.toho-movie.jp/atm/img/ch_leaves_v2.webp",
+    "source_note": "Official movie character artwork; character region cropped. Hitoha has one leaf; Futaba has two leaves. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      550,
+      0,
+      1080,
+      755
+    ],
+    "width": 512,
+    "height": 512
+  },
+  "anoko": {
+    "file": "assets/anoko.webp",
+    "source_url": "https://chiikawamarket.jp/cdn/shop/collections/09anoko.png?v=1766471317",
+    "source_note": "Official Chiikawa Market character-category transparent portrait; trimmed and padded. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": null,
+    "width": 512,
+    "height": 512
+  },
+  "kabuto": {
+    "file": "assets/kabuto.webp",
+    "source_url": "https://chiikawamarket.jp/cdn/shop/collections/14kabutomusi.png?v=1766471127",
+    "source_note": "Official Chiikawa Market character-category transparent portrait; trimmed and padded. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": null,
+    "width": 512,
+    "height": 512
+  },
+  "ode": {
+    "file": "assets/ode.webp",
+    "source_url": "https://chiikawamarket.jp/cdn/shop/collections/11ode.png?v=1766471207",
+    "source_note": "Official Chiikawa Market character-category transparent portrait; trimmed and padded. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": null,
+    "width": 512,
+    "height": 512
+  },
+  "dekatsuyo": {
+    "file": "assets/dekatsuyo.webp",
+    "source_url": "https://chiikawamarket.jp/cdn/shop/collections/10dekatsuyo.png?v=1766471286",
+    "source_note": "Official Chiikawa Market character-category transparent portrait; trimmed and padded. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": null,
+    "width": 512,
+    "height": 512
+  },
+  "midori": {
+    "file": "assets/midori.webp",
+    "source_url": "https://www.anime-chiikawa.jp/images/characters/img_charapage.png",
+    "source_note": "Foreground green Pajama Party member (Midori), extracted from official group sprite; green silhouette plus outline retained. Display canvas standardized to 512×512, artwork fitted within 440×440.",
+    "crop": [
+      3037,
+      0,
+      3452,
+      333
+    ],
+    "width": 512,
+    "height": 512
+  }
+}

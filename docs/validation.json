@@ -1,0 +1,51 @@
+{
+  "questions": 20,
+  "choices": 4,
+  "outcomes": 20,
+  "imageWeight": 0.5,
+  "minNonImageDistance": 5,
+  "nearest": [
+    [
+      "chiikawa",
+      "dekatsuyo"
+    ]
+  ],
+  "anchoredSingleAnswerEdits": 1200,
+  "randomReachability": {
+    "chiikawa": 1627,
+    "hachiware": 2142,
+    "usagi": 2130,
+    "momonga": 2679,
+    "kurimanju": 2812,
+    "rakko": 2082,
+    "shisa": 2428,
+    "furuhonya": 1694,
+    "pochette": 2463,
+    "roudo": 2149,
+    "ramen": 2208,
+    "ode": 2419,
+    "dekatsuyo": 2563,
+    "midori": 2596,
+    "shimajiro": 3432,
+    "siren": 3080,
+    "hitoha": 2644,
+    "futaba": 2580,
+    "anoko": 2797,
+    "kabuto": 3475
+  },
+  "topScoreTies": 12415,
+  "samples": 50000,
+  "note": "Synthetic checks verify code and separation, not human psychological validity.",
+  "assetsChecked": 36,
+  "cardExport": {
+    "characters": 20,
+    "dimensions": [
+      1080,
+      1440
+    ],
+    "textBoundsViolations": 0
+  },
+  "shareChecks": "Result/invite URL, native dispatch, cancel/fallback and PNG payload passed.",
+  "mobileBrowserQA": "Not performed: browser QA tool unavailable.",
+  "shareBase": "https://mkr-games.github.io/Chiikawatest/"
+}
