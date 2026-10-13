@@ -1,5 +1,5 @@
-import {BY_ID,CHARACTERS} from './data.js?v=1.2.0';
-import {withParticle as josa} from './korean.js?v=1.2.0';
+import {BY_ID,CHARACTERS} from './data.js?v=1.2.1';
+import {withParticle as josa} from './korean.js?v=1.2.1';
 // Pair writing combines each character's distinct contribution, needs and plans.
 // Canonical pair labels are symmetric; the story follows the user's perspective.
 const rows={

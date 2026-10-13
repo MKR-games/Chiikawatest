@@ -36,7 +36,7 @@
   "topScoreTies": 12415,
   "samples": 50000,
   "note": "Synthetic checks verify code and separation, not human psychological validity.",
-  "release": "1.2.0",
+  "release": "1.2.1",
   "assetsChecked": 39,
   "nameRegistration": "Input normalization, persistence and invalid storage checked",
   "koreanParticles": "All tag and relationship text uses final-syllable selection",
@@ -62,6 +62,23 @@
     "fileSignaturesChecked": true
   },
   "shareChecks": "Actual app handlers: platform chooser before share, URL only, PNG/JPG download names and MIME, Instagram image-only JPEG, full PNG + description + URL where supported, synchronous user-gesture invocation, explicit fallback instructions, no automatic clipboard writes on cancellation or unsupported browsers",
-  "mobileBrowserQA": "Not performed: image rendering and mocked Web Share handler checks only; actual iOS/Android app targets not tested",
-  "shareBase": "https://mkr-games.github.io/Chiikawatest/"
+  "mobileBrowserQA": "Not performed on an actual KakaoTalk/iOS/Android device; official Kakao documentation, canvas output and mocked handler tests only",
+  "shareBase": "https://mkr-games.github.io/Chiikawatest/",
+  "downloadChecks": "Image bytes written to the file picker; PNG/JPEG MIME and extension; no blob download URLs; iOS Kakao data URL download; Android Kakao external-browser continuation; cancel does not trigger another save",
+  "browserHandoff": {
+    "ownedResultsChecked": 20,
+    "fields": [
+      "name",
+      "answers",
+      "character",
+      "mode",
+      "action",
+      "format",
+      "invite"
+    ],
+    "location": "URL fragment, consumed and removed on arrival",
+    "publicShareLinkUnchanged": true,
+    "actualRestoreHandler": "passed"
+  },
+  "loadingMotion": "CSS card drawing, character, pencil, sparkles and indeterminate activity bar; real preparation-stage messages; reduced-motion support; no browser visual QA"
 }

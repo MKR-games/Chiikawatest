@@ -4,6 +4,7 @@ import vm from 'node:vm';
 import {File} from 'node:buffer';
 import {BY_ID} from '../data.js';
 import {SHARE_BASE,headline,caption,linkPayload,cardPayload} from '../personalization.js';
+import {isKakaoBrowser,isAppleMobile,makeHandoffURL,readHandoff,kakaoExternalURL} from '../browser-handoff.js';
 import {SHARE_PLATFORMS,cardFileName,nativeSharePayload,launchDeviceShare} from '../sharing.js';
 
 const c=BY_ID.usagi,calls=[],copied=[],html=[];
@@ -39,14 +40,17 @@ let loading=null,urlCount=0,encodes=0;
 const modal={open:true,querySelector:()=>loading};
 class TestURL extends URL{static createObjectURL(){return 'blob:card-'+(++urlCount);}static revokeObjectURL(){}}
 const context=vm.createContext({
- URL:TestURL,File,Blob,SHARE_PLATFORMS,cardFileName,nativeSharePayload,launchDeviceShare,
+ URL:TestURL,File,Blob,isKakaoBrowser:()=>isKakaoBrowser(nav),isAppleMobile:()=>isAppleMobile(nav),makeHandoffURL,readHandoff,kakaoExternalURL,SHARE_PLATFORMS,cardFileName,nativeSharePayload,launchDeviceShare,
  linkPayload,cardPayload,headline,caption,navigator:nav,currentResult:c,
- cardCache:null,cardPending:null,cardRevision:0,shareRequest:null,shareBusy:false,
- resultPerson:()=> '민구',modal,
+ cardCache:null,cardPending:null,cardRevision:0,shareRequest:null,shareBusy:false,downloadSelection:null,downloadBusy:false,externalHandoffURL:null,
+ resultPerson:()=> '민구',modal,charImage:c=>`<img src="${c.image}">`,
+ kakaoNotice:()=>'',externalBrowserGuide:(...args)=>{context.externalArgs=args;},
+ imageDataURL:async blob=>`data:${blob.type};base64,${Buffer.from(await blob.arrayBuffer()).toString('base64')}`,
+ setTimeout:fn=>queueMicrotask(fn),
  icon:n=>`<svg data-icon="${n}"></svg>`,esc:s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
  modalTop:t=>`<h2>${t}</h2>`,
- openModal:markup=>{if(loading)loading.isConnected=false;loading=markup.includes('class="card-loading"')?{isConnected:true}:null;html.push(markup);modal.open=true;},
- createResultCardFiles:async()=>{encodes++;return {png,jpg};},
+ openModal:markup=>{if(loading)loading.isConnected=false;loading=markup.includes('class="card-loading"')?{isConnected:true,dataset:{},querySelector:()=>({textContent:''}),querySelectorAll:()=>[],setAttribute:()=>{}}:null;html.push(markup);modal.open=true;},
+ createResultCardFiles:async(c,name,env)=>{encodes++;for(const stage of [0,1,2,3])env.onProgress(stage);return {png,jpg};},
  copyLink:async s=>copied.push(s),toast:()=>{}
 });
 vm.runInContext(source.slice(source.indexOf('function shareResult('),source.indexOf('function nameDialog(')),context);
@@ -79,9 +83,19 @@ assert.equal(payload.title,headline('민구',c));
 await context.chooseSharePlatform('instagram');
 payload=calls.at(-1);assert.deepEqual(Object.keys(payload),['files']);assert.equal(payload.files[0].type,'image/jpeg');
 await context.saveCard();
-assert.ok(html.at(-1).includes('download="먼작귀_민구_usagi.png"'));
-assert.ok(html.at(-1).includes('download="먼작귀_민구_usagi.jpg"'));
+assert.ok(html.at(-1).includes('data-format="png"'));
+assert.ok(context.cardCache.urls.png.startsWith('data:image/png;base64,'));
+assert.ok(html.at(-1).includes('data-format="jpg"'));
+assert.ok(context.cardCache.urls.jpg.startsWith('data:image/jpeg;base64,'));
 assert.equal(encodes,1,'Sharing and downloading should reuse the prepared image files');
 assert.equal(copied.length,0,'Only explicit Copy controls may write the clipboard');
 assert.ok(caption('민구',c).includes(SHARE_BASE));
+nav.userAgent='Mozilla/5.0 (Linux; Android 15) KAKAOTALK 26.1';
+context.shareResult();const beforeKakao=calls.length;
+await context.chooseSharePlatform('kakao');
+assert.equal(calls.length,beforeKakao,'Kakao must not attempt the failing Web Share path');
+assert.deepEqual(Array.from(context.externalArgs),['link-share','png','kakao']);
+await context.downloadImage('jpg');
+assert.deepEqual(Array.from(context.externalArgs),['download','jpg']);
+assert.ok(html.some(markup=>markup.includes('class="card-workshop"')&&markup.includes('maker-pencil')));
 console.log('PASS: app platform chooser, URL-only sharing, PNG/JPG downloads, image sharing, cancellation, unavailable-browser instructions and cached preparation.');

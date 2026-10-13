@@ -1,10 +1,10 @@
 {
   "name": "chiikawa-little-day",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "type": "module",
   "description": "모바일 먼작귀 캐릭터 성격 테스트 · 20문항, 20가지 결과",
   "scripts": {
-    "test": "node tests/engine.test.mjs && node tests/share.test.mjs && node tests/personalization.test.mjs"
+    "test": "node tests/engine.test.mjs && node tests/share.test.mjs && node tests/personalization.test.mjs && node tests/downloads.test.mjs"
   }
 }

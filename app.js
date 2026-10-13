@@ -1,16 +1,18 @@
-import {CHARACTERS,BY_ID,QUESTIONS,CHAPTERS,MOODS,SOURCES} from './data.js?v=1.2.0';
-import {getResult,rankCharacters,describeSignals,pairing,readSaved,writeSaved,validAnswers,QuizSession} from './engine.js?v=1.2.0';
-import {SHARE_BASE,normalizeName,readName,writeName,headline,caption,linkPayload} from './personalization.js?v=1.2.0';
-import {DETAILS} from './details.js?v=1.2.0';
-import {mismatchFriends} from './relationships.js?v=1.2.0';
-import {createResultCardFiles} from './card.js?v=1.2.0';
-import {SHARE_PLATFORMS,cardFileName,nativeSharePayload,launchDeviceShare} from './sharing.js?v=1.2.0';
-import {withParticle} from './korean.js?v=1.2.0';
+import {CHARACTERS,BY_ID,QUESTIONS,CHAPTERS,MOODS,SOURCES} from './data.js?v=1.2.1';
+import {getResult,rankCharacters,describeSignals,pairing,readSaved,writeSaved,validAnswers,QuizSession} from './engine.js?v=1.2.1';
+import {SHARE_BASE,normalizeName,readName,writeName,headline,caption,linkPayload} from './personalization.js?v=1.2.1';
+import {DETAILS} from './details.js?v=1.2.1';
+import {mismatchFriends} from './relationships.js?v=1.2.1';
+import {createResultCardFiles} from './card.js?v=1.2.1';
+import {SHARE_PLATFORMS,cardFileName,nativeSharePayload,launchDeviceShare} from './sharing.js?v=1.2.1';
+import {imageDataURL,saveImageFile,canSaveWithDevice,saveWithDevice} from './downloads.js?v=1.2.1';
+import {isKakaoBrowser,isAppleMobile,makeHandoffURL,readHandoff,kakaoExternalURL} from './browser-handoff.js?v=1.2.1';
+import {withParticle} from './korean.js?v=1.2.1';
 const app=document.querySelector('#app'),modal=document.querySelector('#modal');
 const store=(()=>{try{return window.localStorage;}catch{return {getItem:()=>null,setItem:()=>{}};}})();
 const quiz=new QuizSession(readSaved(store));
 let playerName=readName(store);
-let screen='home',currentResult=null,resultMode='own',toastTimer,cardCache=null,cardPending=null,cardRevision=0,shareRequest=null,shareBusy=false;
+let screen='home',currentResult=null,resultMode='own',toastTimer,cardCache=null,cardPending=null,cardRevision=0,shareRequest=null,shareBusy=false,downloadSelection=null,downloadBusy=false,externalHandoffURL=null;
 const params=new URLSearchParams(location.search);
 let invitedBy=BY_ID[params.get('with')]?.id||null;
 const initialResult=BY_ID[params.get('r')]?.id||null;
@@ -20,8 +22,8 @@ const paths={
 function icon(name){return `<svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[name]||paths.spark}"/></svg>`;}
 const charImage=(c,extra='')=>`<img src="${c.image}" alt="${esc(c.name)}" width="512" height="512" ${extra}>`;
 function setView(html,name){screen=name;app.innerHTML=html;document.body.dataset.screen=name;window.scrollTo({top:0,behavior:'instant'});app.focus({preventScroll:true});}
-function routeResult(c){const u=new URL(location.href);u.search='';u.searchParams.set('r',c.id);u.searchParams.set('v','1');if(invitedBy)u.searchParams.set('with',invitedBy);history.replaceState(null,'',u);document.title=`${c.name} — 먼작귀 속의 나`;}
-function cleanRoute(){const u=new URL(location.href);u.search='';if(invitedBy)u.searchParams.set('with',invitedBy);history.replaceState(null,'',u);document.title='먼작귀 속의 나 — 작은 하루, 20가지 친구';}
+function routeResult(c){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('r',c.id);u.searchParams.set('v','1');if(invitedBy)u.searchParams.set('with',invitedBy);history.replaceState(null,'',u);document.title=`${c.name} — 먼작귀 속의 나`;}
+function cleanRoute(){const u=new URL(location.href);u.search='';u.hash='';if(invitedBy)u.searchParams.set('with',invitedBy);history.replaceState(null,'',u);document.title='먼작귀 속의 나 — 작은 하루, 20가지 친구';}
 function persist(){writeSaved(store,quiz.answers,quiz.index);}
 function toast(text){const el=document.querySelector('#toast');el.textContent=text;el.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('visible'),2700);}
 function openModal(html){document.querySelector('#modal-content').innerHTML=`<div class="modal-inner">${html}</div>`;if(!modal.open)modal.showModal();modal.scrollTop=0;modal.querySelector('#modal-title')?.focus({preventScroll:true});}
@@ -91,25 +93,40 @@ function about(){openModal(`${modalTop('작은 하루에 대하여')}<p>먼작�
 function resultPerson(){return resultMode==='own'?(playerName||'친구'):'친구';}
 function shareURL(invite=false){return linkPayload(invite?currentResult?.id:null).url;}
 async function copyLink(url){try{await navigator.clipboard.writeText(url);toast('링크를 복사했어요. 친구에게 붙여 넣어 주세요.');}catch{openModal(`${modalTop('링크 가져가기')}<p>아래 주소를 길게 눌러 복사해 주세요.</p><input class="copy-input" readonly value="${esc(url)}" aria-label="복사할 링크">${shareRequest?.kind==='link'?'<button class="secondary" data-action="share-back">공유 선택창으로 돌아가기</button>':''}`);const el=modal.querySelector('input');el.focus();el.select();}}
+function kakaoNotice(action='download'){
+ return isKakaoBrowser()?`<div class="kakao-notice"><b>카카오톡에서 보고 계시네요</b><p>저장·공유가 막히면 기본 브라우저로 이어가세요. 이름과 결과가 그대로 따라가요.</p><button class="secondary" data-action="external-guide" data-next="${action}">기본 브라우저로 이어가기 ${icon('arrow')}</button></div>`:'';
+}
+function externalBrowserGuide(action='download',format='png',platform='other'){
+ if(!currentResult)return;
+ const mode=resultMode==='own'&&validAnswers(quiz.answers,true)?'own':resultMode==='gallery'?'gallery':'shared';
+ externalHandoffURL=makeHandoffURL({character:currentResult.id,name:resultPerson(),mode,answers:mode==='own'?quiz.answers:[],action,format,platform,invite:invitedBy,invitation:action==='link-share'&&!!shareRequest?.payload?.url?.includes('?with=')});
+ // The Kakao menu's "open in browser" action also gets the resumable state.
+ const here=new URL(location.href);here.hash=new URL(externalHandoffURL).hash;history.replaceState(null,'',here);
+ openModal(`${modalTop('기본 브라우저에서 이어가기')}<div class="external-friend">${charImage(currentResult)}<span>이름도 결과도 그대로!</span></div><p class="share-notice">카카오톡 안에서는 카드 저장과 앱 공유가 막힐 수 있어요. 기본 브라우저에서 이어서 진행해 주세요.</p><a class="primary external-open" href="${esc(kakaoExternalURL(externalHandoffURL))}">기본 브라우저로 이어가기 ${icon('arrow')}</a><p class="share-footnote">다시 테스트하지 않아도 돼요. 이동한 화면에서 저장 또는 공유 버튼을 한 번 더 눌러 주세요.</p><details class="external-help"><summary>브라우저가 열리지 않나요?</summary><p>카카오톡 화면의 메뉴에서 ‘다른 브라우저로 열기’를 선택하거나, 아래 주소를 복사해 Chrome·Safari 주소창에 붙여 넣어 주세요.</p><button class="secondary" data-action="copy-handoff">내 결과 이어보기 주소 복사</button><input class="copy-input handoff-input" readonly aria-label="내 결과를 이어 볼 주소" value="${esc(externalHandoffURL)}"><p class="share-footnote">이 주소는 이름과 결과를 다른 브라우저로 옮기는 데 사용해요. 친구에게는 ‘링크 공유’를 이용해 주세요.</p></details><button class="text-button share-back" data-action="${action==='link-share'?'share-back':'save-card'}">이 화면으로 돌아가기</button>`);
+}
+async function copyHandoff(){
+ if(!externalHandoffURL)return;
+ try{await navigator.clipboard.writeText(externalHandoffURL);toast('주소를 복사했어요. Chrome·Safari 주소창에 붙여 넣어 주세요.');}
+ catch{const input=modal.querySelector('.handoff-input');input?.focus();input?.select();toast('선택된 주소를 복사해 다른 브라우저에 붙여 넣어 주세요.');}
+}
 function shareResult(invite=false){
  openShareChooser({kind:'link',payload:linkPayload(invite?currentResult?.id:null)});
 }
 function clearCardCache(){
  cardRevision++;
- if(cardCache)Object.values(cardCache.urls).forEach(url=>URL.revokeObjectURL(url));
  cardCache=null;cardPending=null;
 }
-async function makeCard(c,name){
+async function makeCard(c,name,onProgress=()=>{}){
  const key=c.id+'|'+name;
  if(cardCache?.key===key)return cardCache;
  if(cardPending?.key===key)return cardPending.promise;
  clearCardCache();const revision=cardRevision;
  const promise=(async()=>{
-  const images=await createResultCardFiles(c,name);
+  const images=await createResultCardFiles(c,name,{onProgress});
+  const [pngURL,jpgURL]=await Promise.all([imageDataURL(images.png),imageDataURL(images.jpg)]);
   if(revision!==cardRevision)return null;
-  const urls={},files={};
+  const urls={png:pngURL,jpg:jpgURL},files={};
   for(const format of ['png','jpg']){
-   urls[format]=URL.createObjectURL(images[format]);
    files[format]=new File([images[format]],cardFileName(name,c,format),{type:images[format].type});
   }
   cardCache={key,name,character:c,images,urls,files};return cardCache;
@@ -118,14 +135,41 @@ async function makeCard(c,name){
  try{return await promise;}finally{if(cardPending?.promise===promise)cardPending=null;}
 }
 function downloadButtons(card){
- return `<div class="download-grid">${['png','jpg'].map(format=>`<a class="download-option" href="${card.urls[format]}" download="${esc(card.files[format].name)}">${icon('download')} ${format.toUpperCase()} 다운로드</a>`).join('')}</div>`;
+ return `<div class="download-grid">${['png','jpg'].map(format=>`<button class="download-option" data-action="download-image" data-format="${format}">${icon('download')} ${format.toUpperCase()} 다운로드</button>`).join('')}</div><button class="text-button download-help" data-action="image-save-help" data-format="png">다운로드가 안 되나요? 이미지로 저장하기</button>`;
+}
+function imageSaveDialog(card,format='png',status='manual'){
+ if(!card?.files[format])return;downloadSelection={card,format};
+ const file=card.files[format],available=canSaveWithDevice(file);
+ const note=status==='requested'?'다운로드를 요청했어요. 저장되지 않았다면 아래 방법을 이용해 주세요.':status==='failed'?'파일 저장이 막혔어요. 아래 이미지를 직접 저장할 수 있어요.':'아래 카드를 이미지로 저장해 주세요.';
+ openModal(`${modalTop(format.toUpperCase()+' 이미지 저장')}${kakaoNotice('download')}<p class="share-notice" role="status">${note}</p><p class="image-save-instruction">휴대폰에서는 카드를 <b>길게 눌러 이미지 저장</b>, 컴퓨터에서는 <b>오른쪽 클릭 → 다른 이름으로 이미지 저장</b>을 선택해 주세요.</p><img class="saveable-card" src="${card.urls[format]}" alt="${esc(headline(card.name,card.character))}" width="1080" height="1440">${available?`<button class="primary" data-action="device-save">${icon('download')} 기기 메뉴로 이미지 저장</button><p class="share-footnote">열리는 메뉴에 사진 저장 또는 파일 저장이 있으면 선택해 주세요.</p>`:''}<p class="share-footnote">카카오톡·인스타 안에서 저장 메뉴가 보이지 않으면, 앱의 메뉴에서 Chrome 또는 Safari로 열어 다시 저장해 주세요.</p><button class="secondary" data-action="save-card">PNG·JPG 선택으로 돌아가기</button>`);
+}
+async function downloadImage(format){
+ if(!cardCache?.files[format]||downloadBusy)return;
+ if(isKakaoBrowser()&&!isAppleMobile())return externalBrowserGuide('download',format);
+ const card=cardCache;downloadBusy=true;
+ try{
+  const outcome=await saveImageFile(card.files[format],card.urls[format]);
+  if(outcome.status==='cancelled')return;
+  if(outcome.status==='saved')toast(format.toUpperCase()+' 이미지 파일을 저장했어요.');
+  else imageSaveDialog(card,format,outcome.status);
+ }finally{downloadBusy=false;}
+}
+async function deviceSaveImage(){
+ if(!downloadSelection||downloadBusy)return;
+ const {card,format}=downloadSelection;
+ if(isKakaoBrowser())return externalBrowserGuide('download',format);
+ downloadBusy=true;
+ try{
+  const outcome=await saveWithDevice(card.files[format]);
+  if(outcome.status==='failed'||outcome.status==='unsupported')imageSaveDialog(card,format,'failed');
+ }finally{downloadBusy=false;}
 }
 function shareTools(request){
  return request.kind==='card'?`${downloadButtons(request.card)}<button class="secondary" data-action="copy-caption">공유 문구와 링크 복사</button><p class="share-footnote">링크는 카드 이미지에 들어가지 않아요. 문구를 복사해 게시글이나 스토리 링크에 붙여 넣을 수 있어요.</p>`:`<button class="secondary" data-action="copy-share-link">링크만 복사하기</button>`;
 }
 function openShareChooser(request=shareRequest){
  if(!request)return;shareRequest=request;const isCard=request.kind==='card';
- openModal(`${modalTop(isCard?'카드 공유':'링크 공유')}<p class="share-lead">어디로 보내 볼까요?</p>${isCard?`<div class="share-card-summary"><img src="${request.card.urls.png}" alt="공유할 카드 미리보기" width="72" height="96"><div><strong>${esc(headline(request.card.name,request.card.character))}</strong><span>이름 · 캐릭터 · 짧은 성격 설명</span></div></div>`:'<p class="muted">테스트 링크만 보내요.</p>'}<div class="share-platforms">${SHARE_PLATFORMS.map(p=>`<button class="platform-option" data-action="share-platform" data-platform="${p.id}"><span class="platform-symbol ${p.id}">${icon(p.icon)}</span><span><strong>${p.name}</strong><small>${isCard?p.cardHint:p.linkHint}</small></span>${icon('arrow')}</button>`).join('')}</div><p class="share-footnote">휴대폰에서는 다음 공유창에서 앱을 선택해 주세요. 앱이 안 보이면 복사·저장으로 직접 보낼 수 있어요.</p>${shareTools(request)}`);
+ openModal(`${modalTop(isCard?'카드 공유':'링크 공유')}<p class="share-lead">어디로 보내 볼까요?</p>${kakaoNotice(isCard?'card-share':'link-share')}${isCard?`<div class="share-card-summary"><img src="${request.card.urls.png}" alt="공유할 카드 미리보기" width="72" height="96"><div><strong>${esc(headline(request.card.name,request.card.character))}</strong><span>이름 · 캐릭터 · 짧은 성격 설명</span></div></div>`:'<p class="muted">테스트 링크만 보내요.</p>'}<div class="share-platforms">${SHARE_PLATFORMS.map(p=>`<button class="platform-option" data-action="share-platform" data-platform="${p.id}"><span class="platform-symbol ${p.id}">${icon(p.icon)}</span><span><strong>${p.name}</strong><small>${isCard?p.cardHint:p.linkHint}</small></span>${icon('arrow')}</button>`).join('')}</div><p class="share-footnote">휴대폰에서는 다음 공유창에서 앱을 선택해 주세요. 앱이 안 보이면 복사·저장으로 직접 보낼 수 있어요.</p>${shareTools(request)}`);
 }
 function shareGuide(platform='other',reason='manual'){
  if(!shareRequest)return;
@@ -137,6 +181,7 @@ function shareGuide(platform='other',reason='manual'){
 }
 async function chooseSharePlatform(platform='other',imageOnly=false){
  if(!shareRequest||shareBusy)return;
+ if(isKakaoBrowser())return externalBrowserGuide(shareRequest.kind==='card'?'card-share':'link-share','png',platform);
  const request=shareRequest;
  // No asynchronous preparation before launchDeviceShare: keep the click gesture.
  shareBusy=true;const pending=launchDeviceShare(request,platform,navigator,imageOnly);
@@ -148,15 +193,33 @@ async function chooseSharePlatform(platform='other',imageOnly=false){
   else if(request.kind==='card'&&outcome.imageOnly)toast('설명과 링크는 문구 복사로 함께 보내 주세요.');
  }finally{shareBusy=false;}
 }
+function cardLoadingMarkup(c){
+ return `<div class="card-loading" data-stage="0" aria-busy="true"><div class="card-workshop" aria-hidden="true"><div class="maker-halo"></div><div class="maker-shadow"></div><div class="maker-card"><svg class="maker-outline" viewBox="0 0 150 204" fill="none"><rect x="3" y="3" width="144" height="198" rx="17"/></svg><i class="maker-heading"></i><div class="maker-portrait" style="background:${c.color}">${charImage(c)}</div><i class="maker-line first"></i><i class="maker-line second"></i><span class="maker-stamp">♡</span><span class="maker-scan"></span></div><svg class="maker-pencil" viewBox="0 0 32 120" fill="none"><path d="M7 20h18v70l-9 20-9-20Z" fill="#f2d381" stroke="#796070" stroke-width="3" stroke-linejoin="round"/><path d="M7 20V9a9 9 0 0 1 18 0v11" fill="#efb9bc" stroke="#796070" stroke-width="3"/><path d="M7 89h18l-9 20Z" fill="#f7e9d7" stroke="#796070" stroke-width="3" stroke-linejoin="round"/><path d="M13 104h6l-3 7Z" fill="#796070"/><path d="M16 29v50" stroke="#bf994e" stroke-width="3" stroke-linecap="round"/></svg><span class="maker-spark a">✦</span><span class="maker-spark b">✧</span><span class="maker-spark c">✦</span></div><p class="maker-title">나만의 카드를 만들고 있어요<span class="maker-dots" aria-hidden="true"><i></i><i></i><i></i></span></p><p class="maker-status" data-loading-status role="status" aria-live="polite">예쁜 글씨를 준비하고 있어요.</p><div class="maker-progress" aria-hidden="true"><i></i></div><div class="maker-steps" aria-hidden="true">${['글씨','캐릭터','성격','이미지'].map((step,i)=>`<span class="${i===0?'active':''}">${step}</span>`).join('')}</div></div>`;
+}
+function updateCardLoading(loading,stage){
+ if(!loading?.isConnected)return;
+ loading.dataset.stage=String(stage);
+ const messages=['예쁜 글씨를 준비하고 있어요.','나와 닮은 친구를 데려오고 있어요.','이름과 성격을 한 장에 담고 있어요.','PNG와 JPG 이미지를 마무리하고 있어요.','완성! 카드를 꺼내 드릴게요.'];
+ loading.querySelector('[data-loading-status]').textContent=messages[stage];
+ loading.querySelectorAll('.maker-steps span').forEach((el,i)=>{el.classList.toggle('done',i<stage);el.classList.toggle('active',i===stage);});
+ if(stage===4)loading.setAttribute('aria-busy','false');
+}
 async function prepareCardDialog(forShare=false){
  const c=currentResult,name=resultPerson();if(!c)return;
- openModal(`${modalTop(forShare?'카드 공유':'카드 다운로드')}<div class="card-loading" role="status"><span aria-hidden="true">✦</span><p>이름을 담은 카드를 만들고 있어요.</p></div>`);
+ const reused=cardCache?.key===c.id+'|'+name,started=Date.now();
+ openModal(`${modalTop(forShare?'카드 공유':'카드 다운로드')}${cardLoadingMarkup(c)}`);
  const loading=modal.querySelector('.card-loading');
  try{
-  const card=await makeCard(c,name);
+  // Give the loading illustration a paint before fonts/canvas work begins.
+  await new Promise(resolve=>setTimeout(resolve,30));
+  if(!modal.open||!loading.isConnected)return;
+  const card=await makeCard(c,name,stage=>updateCardLoading(loading,stage));
+  await new Promise(resolve=>setTimeout(resolve,reused?0:Math.max(0,650-(Date.now()-started))));
+  updateCardLoading(loading,4);
+  if(!reused)await new Promise(resolve=>setTimeout(resolve,180));
   if(!card||!modal.open||!loading.isConnected||currentResult?.id!==c.id||resultPerson()!==name)return;
   if(forShare){openShareChooser({kind:'card',card});return;}
-  openModal(`${modalTop('카드 다운로드')}<p class="card-personal-title">${esc(headline(name,c))}</p><img class="card-preview download-preview" src="${card.urls.png}" alt="${esc(headline(name,c))} 결과 카드" width="1080" height="1440">${downloadButtons(card)}<p class="share-footnote">1080 × 1440 이미지 · 카드 안에는 링크가 없어요.<br>사진이 열리면 길게 눌러 이미지 저장을 선택해 주세요.</p><button class="primary" data-action="share-card">${icon('share')} 카드 공유</button>`);
+  openModal(`${modalTop('카드 다운로드')}${kakaoNotice('download')}<p class="card-personal-title">${esc(headline(name,c))}</p><img class="card-preview download-preview" src="${card.urls.png}" alt="${esc(headline(name,c))} 결과 카드" width="1080" height="1440">${downloadButtons(card)}<p class="share-footnote">1080 × 1440 이미지 · 카드 안에는 링크가 없어요.<br>사진이 열리면 길게 눌러 이미지 저장을 선택해 주세요.</p><button class="primary" data-action="share-card">${icon('share')} 카드 공유</button>`);
  }catch{
   if(modal.open&&loading.isConnected)openModal(`${modalTop('카드를 만들지 못했어요')}<p>잠시 후 다시 시도해 주세요.</p><button class="primary" data-action="${forShare?'share-card':'save-card'}">다시 만들기</button>`);
  }
@@ -207,6 +270,11 @@ document.addEventListener('click',e=>{
  case 'copy-invite':copyLink(shareURL(true));break;
  case 'invite':shareResult(true);break;
  case 'save-card':saveCard();break;
+ case 'download-image':downloadImage(b.dataset.format);break;
+ case 'image-save-help':if(cardCache)imageSaveDialog(cardCache,b.dataset.format);break;
+ case 'device-save':deviceSaveImage();break;
+ case 'external-guide':externalBrowserGuide(b.dataset.next||'download',b.dataset.format||'png');break;
+ case 'copy-handoff':copyHandoff();break;
  case 'share-card':shareCard();break;
  case 'share-platform':case 'native-share':chooseSharePlatform(b.dataset.platform);break;
  case 'native-share-image':chooseSharePlatform(b.dataset.platform,true);break;
@@ -229,4 +297,22 @@ document.addEventListener('change',e=>{if(e.target.id==='friend-select'&&current
 document.addEventListener('keydown',e=>{if(screen!=='question'||modal.open||e.altKey||e.ctrlKey||e.metaKey)return;if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;if(/^[1-4]$/.test(e.key)){e.preventDefault();choose(QUESTIONS[quiz.index].order[Number(e.key)-1]);}});
 modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
 window.addEventListener('popstate',()=>{const p=new URLSearchParams(location.search),id=BY_ID[p.get('r')]?.id;if(id)result(id,'shared');else home();});
-if(initialResult)result(initialResult,playerName&&validAnswers(quiz.answers,true)&&getResult(quiz.answers).id===initialResult?'own':'shared');else home();
+async function resumeExternalBrowser(state){
+ const url=new URL(location.href);url.hash='';history.replaceState(null,'',url);
+ invitedBy=state.invite;
+ if(state.mode==='own'){
+  playerName=writeName(store,state.name);quiz.answers=[...state.answers];quiz.index=19;persist();
+ }
+ result(state.character,state.mode);
+ if(state.action==='link-share')shareResult(state.invitation);
+ else if(state.action==='card-share')await shareCard();
+ else{
+  await saveCard();
+  const button=modal.querySelector(`[data-action="download-image"][data-format="${state.format}"]`);
+  button?.classList.add('suggested-download');button?.focus();
+ }
+}
+const resumed=readHandoff(location.hash);
+if(resumed)resumeExternalBrowser(resumed);
+else if(initialResult)result(initialResult,playerName&&validAnswers(quiz.answers,true)&&getResult(quiz.answers).id===initialResult?'own':'shared');
+else home();
