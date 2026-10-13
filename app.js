@@ -1,12 +1,12 @@
 import {CHARACTERS,BY_ID,QUESTIONS,CHAPTERS,MOODS,SOURCES} from './data.js?v=1.2.1';
 import {getResult,rankCharacters,describeSignals,pairing,readSaved,writeSaved,validAnswers,QuizSession} from './engine.js?v=1.2.1';
-import {SHARE_BASE,normalizeName,readName,writeName,headline,caption,linkPayload} from './personalization.js?v=1.2.2';
+import {normalizeName,readName,writeName,headline,caption,linkPayload} from './personalization.js?v=1.2.3';
 import {DETAILS} from './details.js?v=1.2.1';
 import {mismatchFriends} from './relationships.js?v=1.2.1';
-import {createResultCardFiles} from './card.js?v=1.2.2';
-import {SHARE_PLATFORMS,cardFileName,nativeSharePayload,launchDeviceShare} from './sharing.js?v=1.2.2';
-import {imageDataURL,saveImageFile,canSaveWithDevice,saveWithDevice} from './downloads.js?v=1.2.2';
-import {isKakaoBrowser,isAppleMobile,makeHandoffURL,readHandoff,kakaoExternalURL} from './browser-handoff.js?v=1.2.2';
+import {createResultCardFiles} from './card.js?v=1.2.3';
+import {SHARE_PLATFORMS,cardFileName,nativeSharePayload,launchDeviceShare} from './sharing.js?v=1.2.3';
+import {imageDataURL,saveImageFile,canSaveWithDevice,saveWithDevice} from './downloads.js?v=1.2.3';
+import {isKakaoBrowser,isAppleMobile,makeHandoffURL,readHandoff,kakaoExternalURL} from './browser-handoff.js?v=1.2.3';
 import {withParticle} from './korean.js?v=1.2.1';
 const app=document.querySelector('#app'),modal=document.querySelector('#modal');
 const store=(()=>{try{return window.localStorage;}catch{return {getItem:()=>null,setItem:()=>{}};}})();
@@ -91,7 +91,7 @@ function collection(){
 }
 function about(){openModal(`${modalTop('작은 하루에 대하여')}<p>먼작귀 세계에서 보내는 하루를 상상하며, 나와 닮은 캐릭터를 만나는 팬 메이드 성격 놀이예요.</p><p>20개 문항은 모두 4지선다예요. 답을 고른 뒤 다음 질문 버튼을 눌러 이동하고, 이전 질문으로 돌아가 바꿀 수 있어요. 이미지 문항 1개는 다른 문항의 절반만 반영해요.</p><p>성격과 궁합은 작품 속 모습에서 착안해 만든 해석이며, 공식 설정이나 전문 심리 검사가 아니에요. 모든 캐릭터는 답변에 따라 결과로 나올 수 있어요.</p><p>이름과 답변은 이 브라우저에만 저장돼요. 링크 공유는 주소만 보내고, 카드 다운 및 공유에는 이름과 성격 설명이 함께 담겨요. 궁합은 서로의 차이를 가볍게 살펴보는 팬 해석이에요.</p><p>캐릭터 원본 이미지: © nagano / chiikawa committee 및 영화 공식 자료. 우사기 팻말과 풍경 문항 이미지는 AI로 제작했어요.</p><ul class="source-links">${SOURCES.map(([label,url])=>`<li><a href="${url}" target="_blank" rel="noopener noreferrer">${label} ↗</a></li>`).join('')}</ul><button class="secondary" data-action="clear-progress">이 기기에 저장된 이름과 답변 지우기</button>`);}
 function resultPerson(){return resultMode==='own'?(playerName||'친구'):'친구';}
-function shareURL(invite=false){return linkPayload(invite?currentResult?.id:null).url;}
+function shareAddress(invite=false){return linkPayload(invite?currentResult?.id:null).text;}
 async function copyLink(url){try{await navigator.clipboard.writeText(url);toast('링크를 복사했어요. 친구에게 붙여 넣어 주세요.');}catch{openModal(`${modalTop('링크 가져가기')}<p>아래 주소를 길게 눌러 복사해 주세요.</p><input class="copy-input" readonly value="${esc(url)}" aria-label="복사할 링크">${shareRequest?.kind==='link'?'<button class="secondary" data-action="share-back">공유 선택창으로 돌아가기</button>':''}`);const el=modal.querySelector('input');el.focus();el.select();}}
 function kakaoNotice(action='download'){
  return isKakaoBrowser()?`<div class="kakao-notice"><b>카카오톡에서 보고 계시네요</b><p>저장·공유가 막히면 기본 브라우저로 이어가세요. 이름과 결과가 그대로 따라가요.</p><button class="secondary" data-action="external-guide" data-next="${action}">기본 브라우저로 이어가기 ${icon('arrow')}</button></div>`:'';
@@ -99,7 +99,7 @@ function kakaoNotice(action='download'){
 function externalBrowserGuide(action='download',format='png',platform='other'){
  if(!currentResult)return;
  const mode=resultMode==='own'&&validAnswers(quiz.answers,true)?'own':resultMode==='gallery'?'gallery':'shared';
- externalHandoffURL=makeHandoffURL({character:currentResult.id,name:resultPerson(),mode,answers:mode==='own'?quiz.answers:[],action,format,platform,invite:invitedBy,invitation:action==='link-share'&&!!shareRequest?.payload?.url?.includes('?with=')});
+ externalHandoffURL=makeHandoffURL({character:currentResult.id,name:resultPerson(),mode,answers:mode==='own'?quiz.answers:[],action,format,platform,invite:invitedBy,invitation:action==='link-share'&&!!shareRequest?.payload?.text?.includes('?with=')});
  // The Kakao menu's "open in browser" action also gets the resumable state.
  const here=new URL(location.href);here.hash=new URL(externalHandoffURL).hash;history.replaceState(null,'',here);
  openModal(`${modalTop('기본 브라우저에서 이어가기')}<div class="external-friend">${charImage(currentResult)}<span>이름도 결과도 그대로!</span></div><p class="share-notice">카카오톡 안에서는 카드 저장과 앱 공유가 막힐 수 있어요. 기본 브라우저에서 이어서 진행해 주세요.</p><a class="primary external-open" href="${esc(kakaoExternalURL(externalHandoffURL))}">기본 브라우저로 이어가기 ${icon('arrow')}</a><p class="share-footnote">다시 테스트하지 않아도 돼요. 이동한 화면에서 저장 또는 공유 버튼을 한 번 더 눌러 주세요.</p><details class="external-help"><summary>브라우저가 열리지 않나요?</summary><p>카카오톡 화면의 메뉴에서 ‘다른 브라우저로 열기’를 선택하거나, 아래 주소를 복사해 Chrome·Safari 주소창에 붙여 넣어 주세요.</p><button class="secondary" data-action="copy-handoff">내 결과 이어보기 주소 복사</button><input class="copy-input handoff-input" readonly aria-label="내 결과를 이어 볼 주소" value="${esc(externalHandoffURL)}"><p class="share-footnote">이 주소는 이름과 결과를 다른 브라우저로 옮기는 데 사용해요. 친구에게는 ‘링크 공유’를 이용해 주세요.</p></details><button class="text-button share-back" data-action="${action==='link-share'?'share-back':'save-card'}">이 화면으로 돌아가기</button>`);
@@ -169,7 +169,7 @@ function shareTools(request){
 }
 function openShareChooser(request=shareRequest){
  if(!request)return;shareRequest=request;const isCard=request.kind==='card';
- openModal(`${modalTop(isCard?'카드 공유':'링크 공유')}<p class="share-lead">어디로 보내 볼까요?</p>${kakaoNotice(isCard?'card-share':'link-share')}${isCard?`<div class="share-card-summary"><img src="${request.card.urls.png}" alt="공유할 카드 미리보기" width="72" height="96"><div><strong>${esc(headline(request.card.name,request.card.character))}</strong><span>이름 · 캐릭터 · 짧은 성격 설명</span></div></div>`:'<p class="muted">테스트 링크만 보내요.</p>'}<div class="share-platforms">${SHARE_PLATFORMS.map(p=>`<button class="platform-option" data-action="share-platform" data-platform="${p.id}"><span class="platform-symbol ${p.id}">${icon(p.icon)}</span><span><strong>${p.name}</strong><small>${isCard?p.cardHint:p.linkHint}</small></span>${icon('arrow')}</button>`).join('')}</div><p class="share-footnote">휴대폰에서는 다음 공유창에서 앱을 선택해 주세요. 앱이 안 보이면 복사·저장으로 직접 보낼 수 있어요.</p>${shareTools(request)}`);
+ openModal(`${modalTop(isCard?'카드 공유':'링크 공유')}<p class="share-lead">어디로 보내 볼까요?</p>${kakaoNotice(isCard?'card-share':'link-share')}${isCard?`<div class="share-card-summary"><img src="${request.card.urls.png}" alt="공유할 카드 미리보기" width="72" height="96"><div><strong>${esc(headline(request.card.name,request.card.character))}</strong><span>이름 · 캐릭터 · 짧은 성격 설명</span></div></div>`:`<p class="muted">테스트 주소만 보내요.<br><strong>${esc(request.payload.text)}</strong></p>`}<div class="share-platforms">${SHARE_PLATFORMS.map(p=>`<button class="platform-option" data-action="share-platform" data-platform="${p.id}"><span class="platform-symbol ${p.id}">${icon(p.icon)}</span><span><strong>${p.name}</strong><small>${isCard?p.cardHint:p.linkHint}</small></span>${icon('arrow')}</button>`).join('')}</div><p class="share-footnote">휴대폰에서는 다음 공유창에서 앱을 선택해 주세요. 앱이 안 보이면 복사·저장으로 직접 보낼 수 있어요.</p>${shareTools(request)}`);
 }
 function shareGuide(platform='other',reason='manual'){
  if(!shareRequest)return;
@@ -266,8 +266,8 @@ document.addEventListener('click',e=>{
  case 'about':about();break;
  case 'close':closeModal();break;
  case 'share':shareResult();break;
- case 'copy-result':copyLink(shareURL());break;
- case 'copy-invite':copyLink(shareURL(true));break;
+ case 'copy-result':copyLink(shareAddress());break;
+ case 'copy-invite':copyLink(shareAddress(true));break;
  case 'invite':shareResult(true);break;
  case 'save-card':saveCard();break;
  case 'download-image':downloadImage(b.dataset.format);break;
@@ -279,7 +279,7 @@ document.addEventListener('click',e=>{
  case 'share-platform':case 'native-share':chooseSharePlatform(b.dataset.platform);break;
  case 'native-share-image':chooseSharePlatform(b.dataset.platform,true);break;
  case 'share-back':openShareChooser();break;
- case 'copy-share-link':if(shareRequest?.kind==='link')copyLink(shareRequest.payload.url);break;
+ case 'copy-share-link':if(shareRequest?.kind==='link')copyLink(shareRequest.payload.text);break;
  case 'copy-caption':copyCaption();break;
  case 'pair':{const s=document.querySelector('#friend-select');if(s){s.value=id;document.querySelector('#pairing-output').innerHTML=pairMarkup(currentResult.id,id);document.querySelector('.compare-box').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});}break;}
  case 'clear-progress':quiz.restart();playerName='';clearCardCache();try{store.removeItem('little-day-v1');store.removeItem('little-day-name-v1');}catch{}closeModal();home();toast('이 기기에 저장된 이름과 답변을 지웠어요.');break;

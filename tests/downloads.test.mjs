@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import {imageDataURL,saveImageFile,saveWithDevice} from '../downloads.js';
 import {isKakaoBrowser,isAppleMobile,makeHandoffURL,readHandoff,kakaoExternalURL} from '../browser-handoff.js';
 import {CHARACTERS,BY_ID} from '../data.js';
-import {SHARE_BASE,linkPayload} from '../personalization.js';
+import {SHARE_BASE,SHARE_DOMAIN,linkPayload} from '../personalization.js';
 
 class Reader{
  readAsDataURL(blob){blob.arrayBuffer().then(data=>{this.result=`data:${blob.type};base64,${Buffer.from(data).toString('base64')}`;this.onload();});}
@@ -54,7 +54,13 @@ for(const c of CHARACTERS){
 }
 assert.equal(readHandoff('#resume=not-json'),null);assert.equal(readHandoff('#'+'x'.repeat(4001)),null);
 assert.throws(()=>kakaoExternalURL('https://example.com/'));
-assert.deepEqual(Object.keys(linkPayload()),['url']);assert.equal(linkPayload().url,SHARE_BASE,'Public links never include resume/name data');
+assert.deepEqual(linkPayload(),{text:SHARE_DOMAIN},'Public addresses never include resume/name data or a protocol');
+// Browser transfers must work on HTTP now and retain HTTPS once enabled.
+const personalization=readFileSync(new URL('../personalization.js',import.meta.url),'utf8').replace(/^export /gm,'');
+for(const protocol of ['http:','https:']){
+ const base=vm.runInNewContext(personalization+'\nSHARE_BASE',{location:{protocol}});
+ assert.equal(base,protocol+'//나의먼작귀.com/');
+}
 
 const source=readFileSync(new URL('../app.js',import.meta.url),'utf8'),views=[];
 const state=readHandoff(new URL(makeHandoffURL({character:'usagi',name:'민구',mode:'own',answers:BY_ID.usagi.profile,action:'download',format:'jpg'})).hash);

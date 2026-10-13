@@ -1,4 +1,4 @@
-import {SHARE_BASE,normalizeName} from './personalization.js?v=1.2.2';
+import {SHARE_BASE,normalizeName} from './personalization.js?v=1.2.3';
 import {BY_ID} from './data.js?v=1.2.1';
 import {validAnswers,getResult} from './engine.js?v=1.2.1';
 
@@ -16,7 +16,7 @@ export function makeHandoffURL(state){
  const safe=validate({...state,v:1});if(!safe)throw new Error('handoff-state');
  const url=new URL(SHARE_BASE);url.searchParams.set('r',safe.character);
  // Fragment data is used only to resume on the user's other browser.
- // Normal Link Share always uses SHARE_BASE and never this personal URL.
+ // Normal Link Share only sends the public domain text, never this personal URL.
  url.hash=new URLSearchParams({resume:JSON.stringify(safe)}).toString();
  return url.href;
 }
