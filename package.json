@@ -1,6 +1,6 @@
 {
   "name": "chiikawa-little-day",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "모바일 먼작귀 캐릭터 성격 테스트 · 20문항, 20가지 결과",

@@ -36,7 +36,7 @@
   "topScoreTies": 12415,
   "samples": 50000,
   "note": "Synthetic checks verify code and separation, not human psychological validity.",
-  "release": "1.1.0",
+  "release": "1.2.0",
   "assetsChecked": 39,
   "nameRegistration": "Input normalization, persistence and invalid storage checked",
   "koreanParticles": "All tag and relationship text uses final-syllable selection",
@@ -52,9 +52,16 @@
       1080,
       1440
     ],
-    "textBoundsViolations": 0
+    "textBoundsViolations": 0,
+    "formats": [
+      "image/png",
+      "image/jpeg"
+    ],
+    "files": 80,
+    "bitmapLinkRemoved": true,
+    "fileSignaturesChecked": true
   },
-  "shareChecks": "URL-only link share; named PNG, description and URL; cancel and fallback payloads passed",
-  "mobileBrowserQA": "Not performed: browser QA tool unavailable",
+  "shareChecks": "Actual app handlers: platform chooser before share, URL only, PNG/JPG download names and MIME, Instagram image-only JPEG, full PNG + description + URL where supported, synchronous user-gesture invocation, explicit fallback instructions, no automatic clipboard writes on cancellation or unsupported browsers",
+  "mobileBrowserQA": "Not performed: image rendering and mocked Web Share handler checks only; actual iOS/Android app targets not tested",
   "shareBase": "https://mkr-games.github.io/Chiikawatest/"
 }

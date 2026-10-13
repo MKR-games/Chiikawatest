@@ -1,5 +1,5 @@
-import {CHARACTERS,QUESTIONS,BY_ID,VERSION} from './data.js?v=1.1.0';
-import {relationship} from './relationships.js?v=1.1.0';
+import {CHARACTERS,QUESTIONS,BY_ID,VERSION} from './data.js?v=1.2.0';
+import {relationship} from './relationships.js?v=1.2.0';
 export function validAnswers(answers,complete=false){
  return Array.isArray(answers)&&answers.length<=(QUESTIONS.length)&&(!complete||answers.length===QUESTIONS.length)&&Array.from(answers).every(a=>Number.isInteger(a)&&a>=0&&a<4);
 }

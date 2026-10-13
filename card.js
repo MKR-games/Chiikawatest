@@ -1,8 +1,8 @@
-import {SHARE_BASE,normalizeName,shortDescription} from './personalization.js?v=1.1.0';
+import {normalizeName,shortDescription} from './personalization.js?v=1.2.0';
 function rounded(ctx,x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}}
 function fitText(ctx,text,maxWidth,size,family){ctx.font=`${size}px ${family}`;while(ctx.measureText(text).width>maxWidth&&size>18){size--;ctx.font=`${size}px ${family}`;}return size;}
 function wrapText(ctx,text,x,y,maxWidth,lineHeight){let line='';for(const word of text.split(/\s+/)){const next=line?line+' '+word:word;if(line&&ctx.measureText(next).width>maxWidth){ctx.fillText(line,x,y);line=word;y+=lineHeight;}else line=next;}if(line)ctx.fillText(line,x,y);return y+lineHeight;}
-export async function createResultCard(c,name,environment={}){
+async function drawResultCard(c,name,environment={}){
  const doc=environment.document??document,ImageClass=environment.Image??Image;
  const person=normalizeName(name)||'친구';
  if(doc.fonts?.load)await Promise.all([doc.fonts.load('44px Jua',person+c.name),doc.fonts.load('30px LittleDay',shortDescription(c))]);
@@ -23,9 +23,17 @@ export async function createResultCard(c,name,environment={}){
  ctx.strokeStyle='#ddcec5';ctx.setLineDash([8,9]);ctx.beginPath();ctx.moveTo(85,963);ctx.lineTo(995,963);ctx.stroke();ctx.setLineDash([]);
  ctx.textAlign='left';ctx.fillStyle='#66565e';ctx.font='30px LittleDay, sans-serif';
  wrapText(ctx,shortDescription(c),133,1020,814,46);
- rounded(ctx,130,1192,820,119,24,'#f1e5d2');
- ctx.textAlign='center';ctx.fillStyle='#72594c';ctx.font='31px Jua, sans-serif';ctx.fillText('나도 해보기',540,1237);
- fitText(ctx,SHARE_BASE.replace('https://',''),762,26,'LittleDay, sans-serif');ctx.fillText(SHARE_BASE.replace('https://',''),540,1281);
+ ctx.textAlign='center';ctx.fillStyle='#a78a8f';
+ fitText(ctx,`“${c.quote}”`,814,31,'Jua, sans-serif');ctx.fillText(`“${c.quote}”`,540,1262);
  ctx.fillStyle='#a18c8d';ctx.font='18px LittleDay, sans-serif';ctx.fillText('20가지 친구 · 팬 메이드 성격 놀이 · © nagano',540,1354);
- return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('blob')),'image/png'));
+ return canvas;
+}
+function encodeCard(canvas,type){return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?.type===type?resolve(blob):reject(new Error('image-export')),type,.94));}
+export async function createResultCard(c,name,environment={}){
+ return encodeCard(await drawResultCard(c,name,environment),'image/png');
+}
+export async function createResultCardFiles(c,name,environment={}){
+ const canvas=await drawResultCard(c,name,environment);
+ const [png,jpg]=await Promise.all([encodeCard(canvas,'image/png'),encodeCard(canvas,'image/jpeg')]);
+ return {png,jpg};
 }
